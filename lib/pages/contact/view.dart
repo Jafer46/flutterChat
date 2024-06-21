@@ -1,25 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/common/value/appColor.dart';
 import 'package:flutter_chat/pages/contact/controller.dart';
 import 'package:flutter_chat/pages/contact/widgets/contact_list.dart';
 import 'package:get/get.dart';
 
-class ContactPage extends GetView {
+class ContactPage extends GetView<ContactController> {
   const ContactPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.put(ContactController());
-    // AppBar _buildAppBar() {
-    //   return AppBar(
-    //     backgroundColor: primary.shade100,
-    //   );
-    // }
+    AppBar buildAppBar() {
+      return AppBar(
+        title: SearchBar(
+          controller: controller.searchController,
+        ),
+        backgroundColor: primary.shade100,
+      );
+    }
 
     return Scaffold(
-        //appBar: _buildAppBar(),
+        appBar: buildAppBar(),
         body: Container(
-      color: Colors.redAccent,
-      child: const ContactList(),
-    ));
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 66, 69, 78),
+              AppColor.primary,
+            ],
+          )),
+          child: const ContactList(),
+        ));
   }
 }

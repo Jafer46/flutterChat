@@ -55,7 +55,7 @@ class ChatList extends GetView<GroupChatController> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     var item = controller.state.msgcontentList[index];
-                    if (controller.userid == item.uid) {
+                    if (controller.userid == item!.uid) {
                       return chatRightItem(context, item, _showMessageOptions);
                     }
 

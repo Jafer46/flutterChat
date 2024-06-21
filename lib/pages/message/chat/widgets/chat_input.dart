@@ -38,6 +38,7 @@ Widget chatInput(ChatController controller, Function showPicker,
                   children: [
                     TextButton(
                         onPressed: () {
+                          controller.contentNode.unfocus();
                           controller.changeEmojiSelctorVisible();
                         },
                         child: const Icon(

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/common/entities/msgcontent.dart';
+import 'package:flutter_chat/common/entities/names.dart';
 import 'package:flutter_chat/common/services/getRandomString.dart';
 import 'package:flutter_chat/models/user.dart';
 import 'index.dart';
@@ -29,6 +30,7 @@ class ChatController extends GetxController {
   Msgcontent? message;
   String currentMessageId = "";
   var listener;
+  int editMessageIndex = 0;
 
   File? _photo;
   final ImagePicker _imagePicker = ImagePicker();
@@ -36,13 +38,31 @@ class ChatController extends GetxController {
   Future imgFromGallery() async {
     final pickedFile =
         await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      _photo = File(pickedFile.path);
-      uploadFile();
-    } else {
-      print("No iamge selected");
-    }
+    if (pickedFile == null) return;
+    _photo = File(pickedFile.path);
+    print("file is picked");
+    uploadFile();
   }
+
+  // Future imgFromGallery() async {
+  //   if (!Platform.isAndroid) {
+  //     // Web platform
+  //     final fileInput =
+  //         html.document.getElementById('file-input') as html.InputElement;
+  //     if (fileInput.files?.isNotEmpty ?? false) {
+  //       _photo = html.File(
+  //           html.Url.createObjectUrl(fileInput.files?.first) as List<Object>,
+  //           fileInput.files!.first.name) as File?;
+  //     }
+  //   } else {
+  //     // Mobile platform
+  //     final pickedFile =
+  //         await ImagePicker().pickImage(source: ImageSource.gallery);
+  //     if (pickedFile != null) {
+  //       _photo = File(pickedFile.path);
+  //     }
+  //   }
+  // }
 
   Future getImageUrl(String name) async {
     final spaceRef = FirebaseStorage.instance.ref("chat").child(name);
@@ -50,14 +70,14 @@ class ChatController extends GetxController {
     return str;
   }
 
-  sendImageMessage(String url) async {
+  void sendImageMessage(String url) async {
     final content = Msgcontent(
         uid: userid, content: url, type: "image", addtime: Timestamp.now());
 
     await db
-        .collection("message")
+        .collection(Entity.message)
         .doc(doc_id)
-        .collection("msglist")
+        .collection(Entity.messageList)
         .withConverter(
             fromFirestore: Msgcontent.fromFirestore,
             toFirestore: (Msgcontent msgContent, options) =>
@@ -75,27 +95,21 @@ class ChatController extends GetxController {
         .update({"last_msg": "image", "last_time": Timestamp.now()});
   }
 
-  Future uploadFile() async {
+  Future<void> uploadFile() async {
     if (_photo == null) return;
-    final fileName = getRandomString(15) + extension(_photo!.path);
+
+    final fileName = '${getRandomString(15)} ${extension(_photo!.path)}';
+
+    final storageRef = FirebaseStorage.instance.ref('chat/$fileName');
+
     try {
-      final ref = FirebaseStorage.instance.ref("chat").child(fileName);
-      ref.putFile(_photo!).snapshotEvents.listen((event) async {
-        switch (event.state) {
-          case TaskState.running:
-            break;
-          case TaskState.paused:
-            break;
-          case TaskState.success:
-            String imgUrl = await getImageUrl(fileName);
-            sendImageMessage(imgUrl);
-          case TaskState.canceled:
-          case TaskState.error:
-            break;
-        }
-      });
+      final uploadTask = storageRef.putFile(_photo!);
+      final snapshot = await uploadTask.whenComplete(() {});
+      final imageUrl = await snapshot.ref.getDownloadURL();
+
+      sendImageMessage(imageUrl);
     } catch (e) {
-      print("there is an error $e");
+      print('Error uploading file: $e');
     }
   }
 
@@ -108,7 +122,7 @@ class ChatController extends GetxController {
     state.to_avatar.value = data['to_avatar'] ?? "";
   }
 
-  sendMessage() async {
+  void sendMessage() async {
     String sendContent = textController.text;
     final content = Msgcontent(
       uid: userid,
@@ -160,17 +174,16 @@ class ChatController extends GetxController {
               if (change.doc.data() != null) {
                 message = change.doc.data();
                 message!.id = change.doc.id;
+                print(message!.type);
                 state.msgcontentList.insert(0, message!);
               }
               break;
             case DocumentChangeType.modified:
               int index =
                   state.msgcontentList.indexOf((m) => m.id == change.doc.id);
-              List<Msgcontent> msgList = [];
               message = change.doc.data();
               message!.id = change.doc.id;
-              msgList.add(message!);
-              state.msgcontentList.replaceRange(index, index + 1, msgList);
+              state.msgcontentList[index] = message!;
               break;
             case DocumentChangeType.removed:
               state.msgcontentList.removeWhere((m) => m.id == change.doc.id);
@@ -217,7 +230,7 @@ class ChatController extends GetxController {
     }
   }
 
-  void editMessage(Msgcontent message) {
+  void editMessage(Msgcontent message, int index) {
     textController.text = message.content!;
     currentMessageId = message.id!;
     print(message.id);

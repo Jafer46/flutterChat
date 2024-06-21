@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Group {
-  final String? id;
+  String? id;
   final String? name;
-  final String? avatar;
+  String? avatar;
   final String? adminId;
   final String? last_msg;
   final Timestamp? last_time;

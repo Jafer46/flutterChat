@@ -1,3 +1,4 @@
+import 'package:flutter_chat/common/entities/names.dart';
 import 'package:flutter_chat/common/entities/userData.dart';
 import 'package:flutter_chat/common/routes/names.dart';
 import 'package:flutter_chat/common/widgets/toast.dart';
@@ -37,7 +38,7 @@ class SignUpController extends GetxController {
 
         UserStore.to.saveProfile(userProfile);
         var userBase = await db
-            .collection("users")
+            .collection(Entity.users)
             .withConverter(
               fromFirestore: UserData.fromFirestore,
               toFirestore: (UserData userData, options) =>
@@ -55,7 +56,7 @@ class SignUpController extends GetxController {
               fcmtoken: "",
               addTime: Timestamp.now());
           await db
-              .collection("users")
+              .collection(Entity.users)
               .withConverter(
                 fromFirestore: UserData.fromFirestore,
                 toFirestore: (UserData userData, options) =>
@@ -75,14 +76,17 @@ class SignUpController extends GetxController {
   Future<void> handleSignUpByPassword(name, email, password) async {
     try {
       var userBase = await db
-          .collection("users")
+          .collection(Entity.users)
           .withConverter(
             fromFirestore: UserData.fromFirestore,
             toFirestore: (UserData userData, options) => userData.toFirestore(),
           )
           .where("email", isEqualTo: email)
+          .where("name", isEqualTo: name)
           .get();
       if (userBase.docs.isEmpty) {
+        final auth = FirebaseAuth.instance;
+        auth.createUserWithEmailAndPassword(email: email, password: password);
         final data = UserData(
             name: name,
             email: email,
@@ -90,17 +94,27 @@ class SignUpController extends GetxController {
             fcmtoken: "",
             isOnline: false,
             addTime: Timestamp.now());
-        await db
-            .collection("users")
+        var user = await db
+            .collection(Entity.users)
             .withConverter(
               fromFirestore: UserData.fromFirestore,
               toFirestore: (UserData userData, options) =>
                   userData.toFirestore(),
             )
             .add(data);
+        await db
+            .collection(Entity.users)
+            .doc(user.id)
+            .withConverter(
+              fromFirestore: UserData.fromFirestore,
+              toFirestore: (UserData userData, options) =>
+                  userData.toFirestore(),
+            )
+            .update({"id": user.id});
+        toastInfo(msg: "login success");
+        Get.offAndToNamed(AppRoutes.APLLICATION);
       }
-      toastInfo(msg: "login success");
-      Get.offAndToNamed(AppRoutes.APLLICATION);
+      toastInfo(msg: "Email or name exists!");
     } catch (err) {
       toastInfo(msg: "login error");
       print(err);

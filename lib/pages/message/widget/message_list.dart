@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat/common/entities/message.dart';
 import 'package:flutter_chat/common/routes/names.dart';
 import 'package:flutter_chat/common/services/date.dart';
+import 'package:flutter_chat/common/value/appColor.dart';
 import 'package:flutter_chat/pages/message/controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -12,63 +13,30 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class MessageList extends GetView<MessageController> {
   const MessageList({super.key});
 
-  Widget messageListItem(QueryDocumentSnapshot item) {
-    String getText() {
-      if (item is QueryDocumentSnapshot<Msg>) {
-        return item.data().from_uid == controller.token
-            ? item.data().to_name!
-            : item.data().from_name!;
-      }
-      return "";
-    }
-
-    String getLastMessage() {
-      if (item is QueryDocumentSnapshot<Msg>) {
-        return item.data().last_msg ?? "";
-      }
-      return "";
-    }
-
-    Object getLastTime() {
-      if (item is QueryDocumentSnapshot<Msg>) {
-        return item.data().last_time ?? "";
-      }
-      return "";
-    }
-
-    String getAvatar() {
-      if (item is QueryDocumentSnapshot<Msg>) {
-        return item.data().from_uid == controller.token
-            ? item.data().to_avatar!
-            : item.data().from_avatar!;
-      }
-      return "";
-    }
-
+  Widget messageListItem(QueryDocumentSnapshot<Msg> item) {
+    //print(item.id);
     return Container(
         padding: EdgeInsets.only(top: 10.w, left: 15.w, right: 15.w),
         child: InkWell(
             onTap: () {
-              if (item is QueryDocumentSnapshot<Msg>) {
-                var to_uid = "";
-                var to_name = "";
-                var to_avatar = "";
-                if (item.data().from_uid == controller.token) {
-                  to_uid = item.data().to_uid ?? "";
-                  to_name = item.data().to_name ?? "";
-                  to_avatar = item.data().to_avatar ?? "";
-                } else {
-                  to_uid = item.data().from_uid ?? "";
-                  to_name = item.data().from_name ?? "";
-                  to_avatar = item.data().from_avatar ?? "";
-                }
-                Get.toNamed(AppRoutes.CHAT, parameters: {
-                  "doc_id": item.id,
-                  "to_uid": to_uid,
-                  "to_name": to_name,
-                  "to_avatar": to_avatar,
-                });
+              var toUid = "";
+              var toName = "";
+              var toAvatar = "";
+              if (item.data().from_uid == controller.token) {
+                toUid = item.data().to_uid ?? "";
+                toName = item.data().to_name ?? "";
+                toAvatar = item.data().to_avatar ?? "";
+              } else {
+                toUid = item.data().from_uid ?? "";
+                toName = item.data().from_name ?? "";
+                toAvatar = item.data().from_avatar ?? "";
               }
+              Get.toNamed(AppRoutes.CHAT, parameters: {
+                "doc_id": item.id,
+                "to_uid": toUid,
+                "to_name": toName,
+                "to_avatar": toAvatar,
+              });
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -80,22 +48,28 @@ class MessageList extends GetView<MessageController> {
                     width: 54.w,
                     height: 54.w,
                     child: CachedNetworkImage(
-                      imageUrl: getAvatar(),
-                      imageBuilder: (context, imageProvider) => Container(
-                        width: 54.w,
-                        height: 54.w,
-                        decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(54.w)),
-                            image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            )),
-                      ),
-                      errorWidget: (context, url, error) => const CircleAvatar(
-                        backgroundImage: AssetImage('assests/images/D.png'),
-                      ),
-                    ),
+                        imageUrl: item.data().from_uid == controller.token
+                            ? item.data().to_avatar!
+                            : item.data().from_avatar!,
+                        imageBuilder: (context, imageProvider) => Container(
+                              width: 54.w,
+                              height: 54.w,
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(54.w)),
+                                  image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                  )),
+                            ),
+                        errorWidget: (context, url, error) {
+                          String b = item.data().from_uid == controller.token
+                              ? item.data().to_name![0].toUpperCase()
+                              : item.data().from_avatar![0].toUpperCase();
+                          return CircleAvatar(
+                            backgroundImage: AssetImage('assets/images/$b.png'),
+                          );
+                        }),
                   ),
                 ),
                 Container(
@@ -109,13 +83,15 @@ class MessageList extends GetView<MessageController> {
                     children: [
                       SizedBox(
                         width: 180.w,
-                        height: 48.w,
+                        height: 54.w,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              getText(),
+                              item.data().from_uid == controller.token
+                                  ? item.data().to_name!
+                                  : item.data().from_name!,
                               overflow: TextOverflow.clip,
                               maxLines: 1,
                               style: TextStyle(
@@ -124,7 +100,7 @@ class MessageList extends GetView<MessageController> {
                               ),
                             ),
                             Text(
-                              getLastMessage(),
+                              item.data().last_msg ?? "",
                               overflow: TextOverflow.clip,
                               maxLines: 1,
                               style: TextStyle(
@@ -144,7 +120,8 @@ class MessageList extends GetView<MessageController> {
                           children: [
                             Text(
                               duTimeLineFormat(
-                                  (getLastTime() as Timestamp).toDate()),
+                                  (item.data().last_time as Timestamp)
+                                      .toDate()),
                               overflow: TextOverflow.clip,
                               maxLines: 1,
                               style: TextStyle(
@@ -169,18 +146,29 @@ class MessageList extends GetView<MessageController> {
           onLoading: controller.onLoading,
           onRefresh: controller.onRefresh,
           header: const WaterDropHeader(),
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 0.h),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    var item = controller.state.msgList[index];
-                    return messageListItem(item);
-                  }, childCount: controller.state.msgList.length),
-                ),
-              )
-            ],
+          child: Container(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.fromARGB(255, 66, 69, 78),
+                AppColor.primary,
+              ],
+            )),
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 0.h),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      var item = controller.state.msgList[index];
+                      return messageListItem(item);
+                    }, childCount: controller.state.msgList.length),
+                  ),
+                )
+              ],
+            ),
           ),
         ));
   }

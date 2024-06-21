@@ -1,40 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/pages/group/conroller.dart';
+import 'package:flutter_chat/common/routes/names.dart';
+import 'package:flutter_chat/pages/group/widget/group_list.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-class GroupPage extends GetView<GroupController> {
+class GroupPage extends StatelessWidget {
   const GroupPage({super.key});
+
+  AppBar _biuldAppBar() {
+    return AppBar(
+      title: Text(
+        "Group",
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 18.sp,
+        ),
+      ),
+      actions: [
+        IconButton(
+            onPressed: () {
+              Get.toNamed(AppRoutes.SEARCHGROUP);
+            },
+            icon: const Icon(Icons.search))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Padding(
-            padding: EdgeInsets.symmetric(vertical: 14.w),
-            child: Form(
-              key: controller.formState,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 14.w),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: controller.groupNameController,
-                      decoration: const InputDecoration(
-                        label: Text("Group Name"),
-                      ),
-                      validator: (value) {},
-                    ),
-                    //ImagePickerField(),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (controller.formState.currentState!.validate()) {
-                          controller.createGroup();
-                        }
-                      },
-                      child: const Text("Create"),
-                    )
-                  ],
-                ),
-              ),
-            )));
+      appBar: _biuldAppBar(),
+      body: const GroupList(),
+    );
   }
 }

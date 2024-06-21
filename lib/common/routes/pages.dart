@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/common/middlewares/router_welcome.dart';
 //import 'package:flutter_chat/common/middlewares/router_welcome.dart';
 import 'package:flutter_chat/common/routes/names.dart';
+import 'package:flutter_chat/pages/account/binding.dart';
+import 'package:flutter_chat/pages/account/view.dart';
 import 'package:flutter_chat/pages/application/index.dart';
+import 'package:flutter_chat/pages/group/groupDetails/index.dart';
+import 'package:flutter_chat/pages/group/searchGroup/index.dart';
 import 'package:flutter_chat/pages/message/bindings.dart';
 import 'package:flutter_chat/pages/message/chat/index.dart';
-import 'package:flutter_chat/pages/message/photoviewer/index.dart';
+import 'package:flutter_chat/pages/photoviewer/index.dart';
 import 'package:flutter_chat/pages/message/view.dart';
 import 'package:flutter_chat/pages/welcome/index.dart';
 import 'package:flutter_chat/pages/sing_in/index.dart';
@@ -12,7 +17,7 @@ import 'package:flutter_chat/pages/contact/index.dart';
 import 'package:get/get.dart';
 
 import '../../pages/group/chat/index.dart';
-import '../../pages/group/index.dart';
+import '../../pages/group/createGroup/index.dart';
 import '../../pages/profile/index.dart';
 import '../../pages/sign_up/index.dart';
 
@@ -25,11 +30,10 @@ class AppPages {
   static List<String> history = [];
   static final List<GetPage> routes = [
     GetPage(
-      name: AppRoutes.INITIAL,
-      page: () => const WelcomePage(),
-      binding: WelcomeBinding(),
-      //middlewares: [RouteWelcomeMiddleware(priority: 1)]
-    ),
+        name: AppRoutes.INITIAL,
+        page: () => const WelcomePage(),
+        binding: WelcomeBinding(),
+        middlewares: [RouteWelcomeMiddleware(priority: 1)]),
     GetPage(
       name: AppRoutes.SIGN_IN,
       page: () => const SignInPage(),
@@ -67,11 +71,23 @@ class AppPages {
         binding: ProfileBinding()),
     GetPage(
         name: AppRoutes.GROUP,
-        page: () => const GroupPage(),
-        binding: GroupBindings()),
+        page: () => const CreateGroupPage(),
+        binding: CreateGroupBindings()),
     GetPage(
         name: AppRoutes.GROUPCHAT,
         page: () => const GroupChatPage(),
         binding: GroupChatBindings()),
+    GetPage(
+        name: AppRoutes.GROUPDETAILS,
+        page: () => const GroupDetailsPage(),
+        binding: GroupDetailsBinding()),
+    GetPage(
+        name: AppRoutes.SEARCHGROUP,
+        page: () => const SearchGroupPage(),
+        binding: SearchGroupBinding()),
+    GetPage(
+        name: AppRoutes.ACCOUNT,
+        page: () => const AccountPage(),
+        binding: AccountBinding()),
   ];
 }

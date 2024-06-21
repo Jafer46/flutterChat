@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import './index.dart';
+import 'index.dart';
 import 'package:photo_view/photo_view.dart';
 
 class PhotoViewerPage extends GetView<PhotoViewerController> {

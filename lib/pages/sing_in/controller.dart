@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_chat/common/entities/names.dart';
 import 'package:flutter_chat/common/entities/userData.dart';
 import 'package:flutter_chat/common/routes/names.dart';
 import 'package:flutter_chat/common/widgets/toast.dart';
@@ -38,7 +39,7 @@ class SignInController extends GetxController {
 
         UserStore.to.saveProfile(userProfile);
         var userBase = await db
-            .collection("users")
+            .collection(Entity.users)
             .withConverter(
               fromFirestore: UserData.fromFirestore,
               toFirestore: (UserData userData, options) =>
@@ -56,7 +57,7 @@ class SignInController extends GetxController {
               fcmtoken: "",
               addTime: Timestamp.now());
           await db
-              .collection("users")
+              .collection(Entity.users)
               .withConverter(
                 fromFirestore: UserData.fromFirestore,
                 toFirestore: (UserData userData, options) =>
@@ -75,9 +76,13 @@ class SignInController extends GetxController {
     }
   }
 
-  Future<void> handleSignInByPassword(email) async {
-    final userBase =
-        await db.collection("users").where("email", isEqualTo: email).get();
+  Future<void> handleSignInByPassword(email, password) async {
+    final auth = FirebaseAuth.instance;
+    auth.signInWithEmailAndPassword(email: email, password: password);
+    final userBase = await db
+        .collection(Entity.users)
+        .where("email", isEqualTo: email)
+        .get();
     if (userBase.docs.isEmpty) {
       if (kDebugMode) {
         print("user not found");
@@ -95,7 +100,7 @@ class SignInController extends GetxController {
     userProfile.displayName = userData.name;
     userProfile.photoUrl = userData.photourl ?? "";
     if (kDebugMode) {
-      print(userProfile);
+      print("User access token ${userProfile.accessToken}");
     }
     UserStore.to.saveProfile(userProfile);
 

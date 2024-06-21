@@ -40,6 +40,7 @@ Widget flatButtonWidget({
           shape: MaterialStateProperty.all(RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(borderRadius.w))),
         ),
+        onPressed: onPressed,
         child: Text(title,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -47,6 +48,5 @@ Widget flatButtonWidget({
               fontSize: fontsize.sp,
               height: 1,
             )),
-        onPressed: onPressed,
       ));
 }

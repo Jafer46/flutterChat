@@ -23,4 +23,7 @@ const MaterialColor primaryAccent =
 });
 const int _primaryAccentValue = 0xFFFF2626;
 
-class AppColor {}
+class AppColor {
+  static const primary = Color(_primaryPrimaryValue);
+  static const primaAccent = Color(_primaryAccentValue);
+}

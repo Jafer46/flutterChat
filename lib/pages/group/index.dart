@@ -1,6 +1,6 @@
-library group;
+library message;
 
-export './binding.dart';
-export './conroller.dart';
-export './state.dart';
+export './bindings.dart';
+export './index.dart';
 export './view.dart';
+export './controller.dart';

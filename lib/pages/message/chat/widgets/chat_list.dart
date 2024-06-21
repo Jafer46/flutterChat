@@ -9,7 +9,8 @@ import 'package:get/get.dart';
 class ChatList extends GetView<ChatController> {
   const ChatList({super.key});
 
-  void _showMessageOptions(BuildContext context, Msgcontent message) {
+  void _showMessageOptions(
+      BuildContext context, Msgcontent message, int index) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
@@ -24,14 +25,14 @@ class ChatList extends GetView<ChatController> {
                 title: const Text("Delete"),
                 onTap: () {
                   controller.deleteMessage(message);
-                  Navigator.pop(context);
+                  Get.back();
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.edit),
                 title: const Text("Edit"),
                 onTap: () {
-                  controller.editMessage(message);
+                  controller.editMessage(message, index);
                   Navigator.pop(context);
                 },
               )
@@ -56,7 +57,8 @@ class ChatList extends GetView<ChatController> {
                   (context, index) {
                     var item = controller.state.msgcontentList[index];
                     if (controller.userid == item.uid) {
-                      return chatRightItem(context, item, _showMessageOptions);
+                      return chatRightItem(
+                          context, item, _showMessageOptions, index);
                     }
 
                     return chatLeftItem(item);

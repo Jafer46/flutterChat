@@ -1,5 +1,7 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/common/routes/names.dart';
+import 'package:flutter_chat/common/routes/pages.dart';
 import 'package:flutter_chat/common/value/appColor.dart';
 import 'package:flutter_chat/pages/group/chat/widgets/chat_input.dart';
 import 'package:flutter_chat/pages/group/chat/widgets/chat_list.dart';
@@ -28,69 +30,70 @@ class GroupChatPage extends GetView<GroupChatController> {
       //     transform: GradientRotation(90),
       //   )),
       // ),
-      title: Container(
-          padding: EdgeInsets.only(top: 0.w, bottom: 0.w, right: 0.w),
-          child: Row(
-            children: [
-              Container(
-                margin: EdgeInsets.only(right: 10.w),
-                padding: EdgeInsets.only(top: 0.w, bottom: 0.w, right: 0.w),
-                child: InkWell(
+      title: GestureDetector(
+        onTap: () {
+          Get.toNamed(AppRoutes.GROUPDETAILS, parameters: {
+            "groupId": controller.groupId!,
+            "groupAvatar": controller.state.groupAvatar.value,
+          });
+        },
+        child: Container(
+            padding: EdgeInsets.only(top: 0.w, bottom: 0.w, right: 0.w),
+            child: Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 10.w),
+                  padding: EdgeInsets.only(top: 0.w, bottom: 0.w, right: 0.w),
                   child: SizedBox(
-                      width: 30.w,
-                      height: 30.w,
-                      child: CachedNetworkImage(
-                          imageUrl: controller.state.groupAvatar.value,
-                          imageBuilder: (context, imageProvider) => Container(
-                                height: 44.w,
-                                width: 44.w,
-                                margin: null,
-                                decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(44.w)),
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover)),
-                              ),
-                          errorWidget: (context, url, error) {
-                            String a = controller.state.groupName
-                                .toString()[0]
-                                .toUpperCase();
-                            return CircleAvatar(
-                              backgroundImage:
-                                  AssetImage('assets/images/$a.png'),
-                            );
-                          })),
+                    width: 30.w,
+                    height: 30.w,
+                    child: CachedNetworkImage(
+                        imageUrl: controller.state.groupAvatar.value,
+                        imageBuilder: (context, imageProvider) => Container(
+                              height: 44.w,
+                              width: 44.w,
+                              margin: null,
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(44.w)),
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.cover)),
+                            ),
+                        errorWidget: (context, url, error) {
+                          return const CircleAvatar(
+                            backgroundImage: AssetImage('assets/images/D.png'),
+                          );
+                        }),
+                  ),
                 ),
-              ),
-              Container(
-                  width: 180.w,
-                  padding: EdgeInsets.only(top: 10.w, bottom: 0.w, right: 0.w),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 180.w,
-                        height: 44.w,
-                        child: GestureDetector(
-                            onTap: () {},
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(controller.state.groupName.value,
-                                    overflow: TextOverflow.clip,
-                                    style: TextStyle(
-                                      fontFamily: 'Avenir',
-                                      color: Colors.white,
-                                      fontSize: 16.sp,
-                                    ))
-                              ],
-                            )),
-                      )
-                    ],
-                  ))
-            ],
-          )),
+                Container(
+                    width: 180.w,
+                    padding:
+                        EdgeInsets.only(top: 10.w, bottom: 0.w, right: 0.w),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 180.w,
+                          height: 44.w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(controller.state.groupName.value,
+                                  overflow: TextOverflow.clip,
+                                  style: TextStyle(
+                                    fontFamily: 'Avenir',
+                                    color: Colors.white,
+                                    fontSize: 16.sp,
+                                  ))
+                            ],
+                          ),
+                        )
+                      ],
+                    ))
+              ],
+            )),
+      ),
     );
   }
 
@@ -130,31 +133,36 @@ class GroupChatPage extends GetView<GroupChatController> {
       body: SafeArea(
         child: ConstrainedBox(
           constraints: const BoxConstraints.expand(),
-          child: Stack(
+          child: Column(
             children: [
-              const ChatList(),
-              Positioned(
-                  bottom: 0.h,
-                  //height: 50.h,
-                  child: Column(children: [
-                    chatInput(
-                        controller, _showPicker, _toggleEmojiPicker, context),
-                    ValueListenableBuilder<bool>(
-                        valueListenable: controller.isEmojiPickerVisible,
-                        builder: (context, value, child) {
-                          return value
-                              ? SizedBox(
-                                  height: 180.h,
-                                  child: EmojiPicker(
-                                      onEmojiSelected: (category, emoji) {
-                                    controller.textController.text +=
-                                        emoji.emoji;
-                                    controller.changeEmojiSelctorVisible();
-                                  }),
-                                )
-                              : const SizedBox.shrink();
-                        }),
-                  ]))
+              const Expanded(child: ChatList()),
+              chatInput(controller, _showPicker, _toggleEmojiPicker, context),
+              ValueListenableBuilder<bool>(
+                  valueListenable: controller.isEmojiPickerVisible,
+                  builder: (context, value, child) {
+                    return value
+                        ? SizedBox(
+                            height: 180.h,
+                            child:
+                                EmojiPicker(onEmojiSelected: (category, emoji) {
+                              controller.textController.text += emoji.emoji;
+                              controller.changeEmojiSelctorVisible();
+                            }),
+                          )
+                        : const SizedBox.shrink();
+                  }),
+              ValueListenableBuilder<bool>(
+                  valueListenable: controller.isNotJoined,
+                  builder: (context, value, child) {
+                    return value
+                        ? SizedBox(
+                            height: 80.h,
+                            child: TextButton(
+                              onPressed: () {},
+                              child: const Text("Join"),
+                            ))
+                        : const SizedBox.shrink();
+                  })
             ],
           ),
         ),

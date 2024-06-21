@@ -6,11 +6,11 @@ import 'package:flutter_chat/common/routes/names.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-Widget chatRightItem(
-    BuildContext context, Msgcontent item, Function showMessageOptions) {
+Widget chatRightItem(BuildContext context, Msgcontent item,
+    Function showMessageOptions, int index) {
   return GestureDetector(
     onLongPress: () {
-      showMessageOptions(context, item);
+      showMessageOptions(context, item, index);
     },
     child: Container(
         padding:

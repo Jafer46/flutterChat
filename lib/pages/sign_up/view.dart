@@ -20,27 +20,11 @@ class SignUpPage extends GetView<SignUpController> {
                 width: 76.w,
                 height: 76.w,
                 margin: EdgeInsets.symmetric(horizontal: 15.w),
-                child: Stack(
-                  children: [
-                    Positioned(
-                        child: Container(
-                      height: 76.w,
-                      decoration: const BoxDecoration(
-                        color: primary,
-                        // boxShadow: [
-
-                        // ],
-                        borderRadius: BorderRadius.all(Radius.circular(35)),
-                      ),
-                    )),
-                    Positioned(
-                        child: Image.asset(
-                      "assets/images/ic_launcher.png",
-                      width: 76.w,
-                      height: 76.w,
-                      fit: BoxFit.cover,
-                    ))
-                  ],
+                child: Image.asset(
+                  "assets/images/ic_launcher.png",
+                  width: 76.w,
+                  height: 76.w,
+                  fit: BoxFit.cover,
                 ),
               ),
               Container(
@@ -62,23 +46,16 @@ class SignUpPage extends GetView<SignUpController> {
       return SizedBox(
           width: 400.w,
           //margin: EdgeInsets.only(bottom: 280.h),
-          child: Column(
-            children: [
-              Text("sign in with social networks ",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10.sp)),
-              Padding(
-                  padding: EdgeInsets.only(left: 50.w, right: 50.w),
-                  child: flatButtonWidget(
-                      onPressed: () {
-                        controller.handleSignUpByGoogle();
-                      },
-                      width: 800.w,
-                      height: 20.w,
-                      title: "Google login",
-                      borderRadius: 2))
-            ],
-          ));
+          child: Padding(
+              padding: EdgeInsets.only(left: 50.w, right: 50.w),
+              child: flatButtonWidget(
+                  onPressed: () {
+                    controller.handleSignUpByGoogle();
+                  },
+                  width: 800.w,
+                  height: 30.w,
+                  title: "Google sign in",
+                  borderRadius: 6)));
     }
 
     Widget buildLoginForm() {
@@ -138,18 +115,17 @@ class SignUpPage extends GetView<SignUpController> {
                     },
                   ),
                 ),
-                flatButtonWidget(
-                    title: "sign up",
-                    fontColor: Colors.blueAccent,
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        final name = nameController.text;
-                        final email = emailController.text;
-                        final password = passwordController.text;
-                        controller.handleSignUpByPassword(
-                            name, email, password);
-                      }
-                    }),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      final name = nameController.text;
+                      final email = emailController.text;
+                      final password = passwordController.text;
+                      controller.handleSignUpByPassword(name, email, password);
+                    }
+                  },
+                  child: const Text("Sign up"),
+                ),
                 Container(
                     //decoration: BoxDecoration(backgroundBlendMode: BlendMode.clear),
                     padding: EdgeInsets.only(top: 5.sp),
@@ -166,9 +142,10 @@ class SignUpPage extends GetView<SignUpController> {
     }
 
     return Scaffold(
-        body: Center(
+        body: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
-      children: [buildLogo(), buildLoginForm(), buildThirdPartyLogin()],
-    )));
+              children: [buildLogo(), buildLoginForm(), buildThirdPartyLogin()],
+            )));
   }
 }

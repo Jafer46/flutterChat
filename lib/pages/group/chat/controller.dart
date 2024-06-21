@@ -4,7 +4,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_chat/common/entities/msgcontent.dart';
+import 'package:flutter_chat/common/entities/names.dart';
+import 'package:flutter_chat/common/entities/userGroups.dart';
 import 'package:flutter_chat/common/services/getRandomString.dart';
 import 'package:flutter_chat/models/user.dart';
 import 'package:get/get.dart';
@@ -19,7 +22,7 @@ import 'index.dart';
 class GroupChatController extends GetxController {
   GroupChatController();
   GroupChatState state = GroupChatState();
-  var doc_id = Get.parameters['groupId'];
+  var groupId = Get.parameters['groupId'];
   var textController = TextEditingController();
   ScrollController msgScrolling = ScrollController();
   FocusNode contentNode = FocusNode();
@@ -27,10 +30,11 @@ class GroupChatController extends GetxController {
   final db = FirebaseFirestore.instance;
   ValueNotifier<bool> isEmojiPickerVisible = ValueNotifier<bool>(false);
   ValueNotifier<bool> isEditing = ValueNotifier<bool>(false);
+  ValueNotifier<bool> isNotJoined = ValueNotifier<bool>(false);
   Msgcontent? message;
   String currentMessageId = "";
+  // ignore: prefer_typing_uninitialized_variables
   var listener;
-  final String document = "group";
 
   File? _photo;
   final ImagePicker _imagePicker = ImagePicker();
@@ -57,8 +61,8 @@ class GroupChatController extends GetxController {
         uid: userid, content: url, type: "image", addtime: Timestamp.now());
 
     await db
-        .collection(document)
-        .doc(doc_id)
+        .collection(Entity.group)
+        .doc(groupId)
         .collection("msglist")
         .withConverter(
             fromFirestore: Msgcontent.fromFirestore,
@@ -72,8 +76,8 @@ class GroupChatController extends GetxController {
     });
 
     await db
-        .collection(document)
-        .doc(doc_id)
+        .collection(Entity.group)
+        .doc(groupId)
         .update({"last_msg": "image", "last_time": Timestamp.now()});
   }
 
@@ -108,6 +112,47 @@ class GroupChatController extends GetxController {
     state.groupName.value = data['groupName'] ?? "";
     state.groupAdmin.value = data['groupAdmin'] ?? "";
     state.groupAvatar.value = data['groupAvatar'] ?? "";
+    checkIsJoined();
+  }
+
+  checkIsJoined() async {
+    try {
+      var userGroup = await db
+          .collection(Entity.users)
+          .doc(userid)
+          .collection(Entity.groupList)
+          .withConverter(
+              fromFirestore: UserGroups.fromFirestore,
+              toFirestore: (UserGroups userGroups, options) =>
+                  userGroups.toFirestore())
+          .where("id", isEqualTo: groupId)
+          .get();
+
+      if (userGroup.docs.isEmpty) {
+        isNotJoined.value = true;
+      }
+      isNotJoined.value = false;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  JoinGroup() async {
+    try {
+      UserGroups userGroups = UserGroups(groupId: groupId);
+      await db
+          .collection(Entity.users)
+          .doc(userid)
+          .collection(Entity.groupList)
+          .withConverter(
+              fromFirestore: UserGroups.fromFirestore,
+              toFirestore: (UserGroups userGroups, options) =>
+                  userGroups.toFirestore())
+          .add(userGroups);
+      isNotJoined.value = false;
+    } catch (e) {
+      print(e);
+    }
   }
 
   sendMessage() async {
@@ -119,8 +164,8 @@ class GroupChatController extends GetxController {
       addtime: Timestamp.now(),
     );
     await db
-        .collection("message")
-        .doc(doc_id)
+        .collection(Entity.group)
+        .doc(groupId)
         .collection("msglist")
         .withConverter(
             fromFirestore: Msgcontent.fromFirestore,
@@ -134,8 +179,8 @@ class GroupChatController extends GetxController {
     });
 
     await db
-        .collection("message")
-        .doc(doc_id)
+        .collection(Entity.group)
+        .doc(groupId)
         .update({"last_msg": sendContent, "last_time": Timestamp.now()});
   }
 
@@ -144,8 +189,8 @@ class GroupChatController extends GetxController {
     super.onReady();
 
     var messages = db
-        .collection("message")
-        .doc(doc_id)
+        .collection(Entity.group)
+        .doc(groupId)
         .collection("msglist")
         .withConverter(
             fromFirestore: Msgcontent.fromFirestore,
@@ -166,16 +211,18 @@ class GroupChatController extends GetxController {
               }
               break;
             case DocumentChangeType.modified:
-              int index =
-                  state.msgcontentList.indexOf((m) => m.id == change.doc.id);
-              List<Msgcontent> msgList = [];
-              message = change.doc.data();
-              message!.id = change.doc.id;
-              msgList.add(message!);
-              state.msgcontentList.replaceRange(index, index + 1, msgList);
+              state.msgcontentList
+                  .assignAll(state.msgcontentList.map((element) {
+                if (element!.id == change.doc.id) {
+                  Msgcontent? msg = change.doc.data();
+                  msg!.id = change.doc.id;
+                  return msg;
+                }
+              }));
+
               break;
             case DocumentChangeType.removed:
-              state.msgcontentList.removeWhere((m) => m.id == change.doc.id);
+              state.msgcontentList.removeWhere((m) => m!.id == change.doc.id);
               break;
           }
         }
@@ -195,8 +242,8 @@ class GroupChatController extends GetxController {
   void deleteMessage(Msgcontent message) async {
     try {
       await db
-          .collection(document)
-          .doc(doc_id)
+          .collection(Entity.group)
+          .doc(groupId)
           .collection("msglist")
           .doc(message.id)
           .delete();
@@ -209,8 +256,8 @@ class GroupChatController extends GetxController {
     try {
       if (currentMessageId.isEmpty) return;
       await db
-          .collection(document)
-          .doc(doc_id)
+          .collection(Entity.group)
+          .doc(groupId)
           .collection("msglist")
           .doc(currentMessageId)
           .update({"content": textController.text});

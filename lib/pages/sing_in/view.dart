@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/common/value/appColor.dart';
 import 'package:flutter_chat/common/widgets/flatButtonWidget.dart';
+import 'package:path/path.dart';
 import 'index.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,27 +21,11 @@ class SignInPage extends GetView<SignInController> {
                 width: 76.w,
                 height: 76.w,
                 margin: EdgeInsets.symmetric(horizontal: 15.w),
-                child: Stack(
-                  children: [
-                    Positioned(
-                        child: Container(
-                      height: 76.w,
-                      decoration: const BoxDecoration(
-                        color: primary,
-                        // boxShadow: [
-
-                        // ],
-                        borderRadius: BorderRadius.all(Radius.circular(35)),
-                      ),
-                    )),
-                    Positioned(
-                        child: Image.asset(
-                      "assets/images/ic_launcher.png",
-                      width: 76.w,
-                      height: 76.w,
-                      fit: BoxFit.cover,
-                    ))
-                  ],
+                child: Image.asset(
+                  "assets/images/ic_launcher.png",
+                  width: 76.w,
+                  height: 76.w,
+                  fit: BoxFit.cover,
                 ),
               ),
               Container(
@@ -64,9 +49,6 @@ class SignInPage extends GetView<SignInController> {
           //margin: EdgeInsets.only(bottom: 280.h),
           child: Column(
             children: [
-              Text("sign in with social networks ",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10.sp)),
               Padding(
                   padding: EdgeInsets.only(left: 50.w, right: 50.w),
                   child: flatButtonWidget(
@@ -74,15 +56,16 @@ class SignInPage extends GetView<SignInController> {
                         controller.handleSignIn();
                       },
                       width: 800.w,
-                      height: 20.w,
+                      height: 30.w,
                       title: "Google sign in",
-                      borderRadius: 2))
+                      borderRadius: 4))
             ],
           ));
     }
 
     Widget buildLoginForm() {
-      final _emailController = TextEditingController();
+      final emailController = TextEditingController();
+      final passController = TextEditingController();
       GlobalKey<FormState> formState = GlobalKey();
       return Form(
           key: formState,
@@ -95,10 +78,12 @@ class SignInPage extends GetView<SignInController> {
                   padding: EdgeInsets.only(bottom: 16.sp),
                   child: TextFormField(
                     key: const ValueKey("email"),
-                    controller: _emailController,
+                    controller: emailController,
                     decoration: const InputDecoration(
-                      hintText: "enter email here",
-                    ),
+                        label: Text(
+                      "Email",
+                      style: TextStyle(color: Colors.blueAccent),
+                    )),
                     validator: (value) {
                       if (value!.isEmpty) return "Please enter email";
                       return null;
@@ -109,24 +94,28 @@ class SignInPage extends GetView<SignInController> {
                   padding: EdgeInsets.only(bottom: 16.sp),
                   child: TextFormField(
                     key: const ValueKey("password"),
+                    controller: passController,
                     decoration: const InputDecoration(
-                      hintText: "enter password here",
-                    ),
+                        label: Text(
+                      "Password",
+                      style: TextStyle(color: Colors.blueAccent),
+                    )),
                     validator: (value) {
                       if (value!.isEmpty) return "Please enter password";
                       return null;
                     },
                   ),
                 ),
-                flatButtonWidget(
-                    title: "sign in",
-                    fontColor: Colors.blueAccent,
-                    onPressed: () {
-                      if (formState.currentState!.validate()) {
-                        final email = _emailController.text;
-                        controller.handleSignInByPassword(email);
-                      }
-                    }),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formState.currentState!.validate()) {
+                      final email = emailController.text;
+                      final password = passController.text;
+                      controller.handleSignInByPassword(email, password);
+                    }
+                  },
+                  child: Text("Sign in"),
+                ),
                 Container(
                     //decoration: BoxDecoration(backgroundBlendMode: BlendMode.clear),
                     padding: EdgeInsets.only(top: 5.sp),
@@ -143,9 +132,15 @@ class SignInPage extends GetView<SignInController> {
     }
 
     return Scaffold(
-        body: Center(
+        body: SafeArea(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(),
+        child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
-      children: [buildLogo(), buildLoginForm(), buildThirdPartyLogin()],
-    )));
+              children: [buildLogo(), buildLoginForm(), buildThirdPartyLogin()],
+            )),
+      ),
+    ));
   }
 }

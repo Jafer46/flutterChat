@@ -25,7 +25,7 @@ class ProfilePage extends GetView<ProfileController> {
       padding: EdgeInsets.only(top: 0.w, left: 15.w, right: 15.w),
       child: InkWell(
         onTap: () {
-          Get.toNamed(AppRoutes.GROUP);
+          Get.toNamed(item.route!);
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

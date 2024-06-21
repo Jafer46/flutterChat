@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
     List MyList = [
       {"name": "Account", "icon": "assets/icons/1.png", "route": "/account"},
       {"name": "Group", "icon": "assets/icons/1.png", "route": "/Group"},
-      {"name": "Account", "icon": "assets/icons/1.png", "route": "/account"},
+      {"name": "Logout", "icon": "assets/icons/1.png", "route": "/account"},
       {"name": "Account", "icon": "assets/icons/1.png", "route": "/account"},
       {"name": "Account", "icon": "assets/icons/1.png", "route": "/account"},
       {"name": "Account", "icon": "assets/icons/1.png", "route": "/account"},

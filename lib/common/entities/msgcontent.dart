@@ -5,9 +5,18 @@ class Msgcontent {
   String? uid;
   String? content;
   String? type;
+  String? senderName;
+  String? senderAvatar;
   Timestamp? addtime;
 
-  Msgcontent({this.id, this.uid, this.content, this.type, this.addtime});
+  Msgcontent(
+      {this.id,
+      this.uid,
+      this.content,
+      this.type,
+      this.addtime,
+      this.senderAvatar,
+      this.senderName});
 
   factory Msgcontent.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
@@ -19,6 +28,8 @@ class Msgcontent {
       uid: data?['uid'],
       content: data?['content'],
       type: data?['type'],
+      senderName: data?['senderName'],
+      senderAvatar: data?['senderAvatar'],
       addtime: data?['addtime'],
     );
   }
@@ -29,6 +40,8 @@ class Msgcontent {
       if (uid != null) "uid": uid,
       if (content != null) "content": content,
       if (type != null) "type": type,
+      if (senderName != null) "senderName": senderName,
+      if (senderAvatar != null) "senderAvatar": senderAvatar,
       if (addtime != null) "addtime": addtime,
     };
   }

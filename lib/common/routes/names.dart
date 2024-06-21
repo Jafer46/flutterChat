@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 class AppRoutes {
   static const INITIAL = '/';
   static const SIGN_IN = '/sign_in';
@@ -18,4 +20,8 @@ class AppRoutes {
 
   static const GROUP = '/group';
   static const GROUPCHAT = '/groupchat';
+  static const GROUPDETAILS = '/groupdetails';
+  static const SEARCHGROUP = '/searchgroup';
+
+  static const ACCOUNT = '/account';
 }

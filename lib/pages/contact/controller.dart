@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_chat/common/entities/message.dart';
+import 'package:flutter_chat/common/entities/names.dart';
 import 'package:flutter_chat/common/entities/userData.dart';
 import 'package:flutter_chat/common/routes/names.dart';
 import 'package:flutter_chat/models/user.dart';
@@ -14,11 +16,45 @@ class ContactController extends GetxController {
   final ContactState state = ContactState();
   final db = FirebaseFirestore.instance;
   final token = UserStore.to.token;
+  final TextEditingController searchController = TextEditingController();
+
+  // @override
+  // void onReady() {
+  //   super.onReady();
+  //   asyncLoadAllData();
+  // }
 
   @override
-  void onReady() {
-    super.onReady();
-    asyncLoadAllData();
+  void onInit() {
+    super.onInit();
+    searchController.addListener(() {
+      searchChats();
+    });
+  }
+
+  void searchChats() async {
+    state.contactList.clear();
+    if (searchController.text == "") {
+      return;
+    }
+
+    Set<String?> uniqueIds = {};
+    var users = await db
+        .collection(Entity.users)
+        .withConverter(
+            fromFirestore: UserData.fromFirestore,
+            toFirestore: (UserData userData, options) => userData.toFirestore())
+        .where("name", isGreaterThanOrEqualTo: searchController.text)
+        .where("name", isLessThan: "${searchController.text}\uf8ff")
+        .get();
+    for (var doc in users.docs) {
+      UserData userData = doc.data();
+      userData.id = doc.id;
+      if (!uniqueIds.contains(userData.id)) {
+        uniqueIds.add(userData.id);
+        state.contactList.add(userData);
+      }
+    }
   }
 
   goToChat(UserData toUserData) async {
@@ -91,18 +127,24 @@ class ContactController extends GetxController {
   }
 
   asyncLoadAllData() async {
-    var userBase = await db
-        .collection("users")
-        //.where("id", isNotEqualTo: token)
-        .withConverter(
-            fromFirestore: UserData.fromFirestore,
-            toFirestore: (UserData userData, options) => userData.toFirestore())
-        .get();
-
-    for (var doc in userBase.docs) {
-      UserData userData = doc.data();
-      userData.id = doc.id;
-      state.contactList.add(userData);
+    try {
+      print(token);
+      var userBase = await db
+          .collection("users")
+          //.where("id", isNotEqualTo: token)
+          .withConverter(
+              fromFirestore: UserData.fromFirestore,
+              toFirestore: (UserData userData, options) =>
+                  userData.toFirestore())
+          .get();
+      print(userBase.docs.first.id);
+      for (var doc in userBase.docs) {
+        UserData userData = doc.data();
+        userData.id = doc.id;
+        state.contactList.add(userData);
+      }
+    } catch (error) {
+      print("error on loading user base ${error}");
     }
   }
 }

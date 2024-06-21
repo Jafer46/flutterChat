@@ -3,5 +3,6 @@ import 'package:flutter_chat/common/entities/message.dart';
 import 'package:get/get.dart';
 
 class MessageState {
-  RxList<QueryDocumentSnapshot> msgList = <QueryDocumentSnapshot>[].obs;
+  RxList<QueryDocumentSnapshot<Msg>> msgList =
+      <QueryDocumentSnapshot<Msg>>[].obs;
 }

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_chat/common/entities/message.dart';
 import 'package:flutter_chat/models/user.dart';
 import 'package:flutter_chat/pages/message/state.dart';
@@ -20,51 +21,44 @@ class MessageController extends GetxController {
   void onRefresh() {
     asyncLoadAllData().then((_) {
       refreshController.refreshCompleted(resetFooterState: true);
-    }).cacthError((_) {
-      refreshController.refreshFailed();
     });
   }
 
   void onLoading() {
     asyncLoadAllData().then((_) {
       refreshController.loadComplete();
-    }).catchError((_) {
-      refreshController.loadFailed();
     });
   }
 
   asyncLoadAllData() async {
-    var fromMessage = await db
-        .collection("message")
-        .withConverter(
-            fromFirestore: Msg.fromFirestore,
-            toFirestore: (Msg msg, options) => msg.toFirestore())
-        .where("from_uid", isEqualTo: token)
-        .get();
+    try {
+      var fromMessage = await db
+          .collection("message")
+          .withConverter(
+              fromFirestore: Msg.fromFirestore,
+              toFirestore: (Msg msg, options) => msg.toFirestore())
+          .where("from_uid", isEqualTo: token)
+          .get();
 
-    var toMessage = await db
-        .collection("message")
-        .withConverter(
-            fromFirestore: Msg.fromFirestore,
-            toFirestore: (Msg msg, options) => msg.toFirestore())
-        .where("to_uid", isEqualTo: token)
-        .get();
-    state.msgList.clear();
-    if (fromMessage.docs.isNotEmpty) {
-      state.msgList.assignAll(fromMessage.docs);
-    }
+      var toMessage = await db
+          .collection("message")
+          .withConverter(
+              fromFirestore: Msg.fromFirestore,
+              toFirestore: (Msg msg, options) => msg.toFirestore())
+          .where("to_uid", isEqualTo: token)
+          .get();
+      state.msgList.clear();
+      if (fromMessage.docs.isNotEmpty) {
+        state.msgList.addAll(fromMessage.docs);
+      }
 
-    if (toMessage.docs.isNotEmpty) {
-      state.msgList.assignAll(toMessage.docs);
-    }
-
-    var groupIds =
-        await db.collection("users").doc(token).collection("groupList").get();
-    var userGroups =
-        await db.collection("group").where("id", whereIn: groupIds.docs).get();
-
-    if (userGroups.docs.isNotEmpty) {
-      state.msgList.assignAll(userGroups.docs);
+      if (toMessage.docs.isNotEmpty) {
+        state.msgList.addAll(toMessage.docs);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("loadmessages has error ${e.toString()}");
+      }
     }
   }
 

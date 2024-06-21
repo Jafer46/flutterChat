@@ -1,4 +1,4 @@
-import 'package:flutter_chat/pages/message/photoviewer/index.dart';
+import 'package:flutter_chat/pages/photoviewer/index.dart';
 import 'package:get/get.dart';
 
 class PhotoViewerController extends GetxController {

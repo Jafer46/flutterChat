@@ -1,5 +1,6 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_chat/common/value/appColor.dart';
 import 'package:flutter_chat/pages/message/chat/widgets/chat_input.dart';
 import 'package:flutter_chat/pages/message/chat/widgets/chat_list.dart';
@@ -105,6 +106,7 @@ class ChatPage extends GetView<ChatController> {
                 title: const Text("Gallery"),
                 onTap: () {
                   controller.imgFromGallery();
+                  Navigator.pop(context);
                 },
               ),
               ListTile(
@@ -129,31 +131,25 @@ class ChatPage extends GetView<ChatController> {
       body: SafeArea(
         child: ConstrainedBox(
           constraints: const BoxConstraints.expand(),
-          child: Stack(
+          child: Column(
             children: [
-              const ChatList(),
-              Positioned(
-                  bottom: 0.h,
-                  //height: 50.h,
-                  child: Column(children: [
-                    chatInput(
-                        controller, _showPicker, _toggleEmojiPicker, context),
-                    ValueListenableBuilder<bool>(
-                        valueListenable: controller.isEmojiPickerVisible,
-                        builder: (context, value, child) {
-                          return value
-                              ? SizedBox(
-                                  height: 180.h,
-                                  child: EmojiPicker(
-                                      onEmojiSelected: (category, emoji) {
-                                    controller.textController.text +=
-                                        emoji.emoji;
-                                    controller.changeEmojiSelctorVisible();
-                                  }),
-                                )
-                              : const SizedBox.shrink();
-                        }),
-                  ]))
+              const Expanded(child: ChatList()),
+              chatInput(controller, _showPicker, _toggleEmojiPicker, context),
+              ValueListenableBuilder<bool>(
+                  valueListenable: controller.isEmojiPickerVisible,
+                  builder: (context, value, child) {
+                    return value
+                        ? SizedBox(
+                            height: 180.h,
+                            child: EmojiPicker(
+                              onEmojiSelected: (category, emoji) {
+                                controller.textController.text += emoji.emoji;
+                                controller.changeEmojiSelctorVisible();
+                              },
+                            ),
+                          )
+                        : const SizedBox.shrink();
+                  })
             ],
           ),
         ),

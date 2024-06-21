@@ -15,9 +15,7 @@ class ContactList extends GetView<ContactController> {
     }
     return InkWell(
         onTap: () {
-          print(item.id);
           if (item.id != null) {
-            print("hello from tap");
             controller.goToChat(item);
           }
         },
