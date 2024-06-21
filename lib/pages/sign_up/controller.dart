@@ -86,7 +86,8 @@ class SignUpController extends GetxController {
           .get();
       if (userBase.docs.isEmpty) {
         final auth = FirebaseAuth.instance;
-        auth.createUserWithEmailAndPassword(email: email, password: password);
+        await auth.createUserWithEmailAndPassword(
+            email: email, password: password);
         final data = UserData(
             name: name,
             email: email,

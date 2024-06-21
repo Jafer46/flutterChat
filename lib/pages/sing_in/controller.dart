@@ -78,7 +78,7 @@ class SignInController extends GetxController {
 
   Future<void> handleSignInByPassword(email, password) async {
     final auth = FirebaseAuth.instance;
-    auth.signInWithEmailAndPassword(email: email, password: password);
+    await auth.signInWithEmailAndPassword(email: email, password: password);
     final userBase = await db
         .collection(Entity.users)
         .where("email", isEqualTo: email)
